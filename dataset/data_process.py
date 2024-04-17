@@ -64,7 +64,12 @@ def TDC(num_domain, data_file, station, dis_type = 'coral'):
     feat=torch.tensor(feat, dtype=torch.float32)
     feat_shape_1 = feat.shape[1] 
     feat =feat.reshape(-1, feat.shape[2])
-    feat = feat.cuda()
+    # feat = feat.cuda()
+    # Removing the only CUDA functionality in order for the code to run on cpu
+    if torch.cuda.is_available():
+        feat = feat.cuda()
+    else:
+        print("CUDA is not available. Running on CPU.")
     # num_day_new = feat.shape[0]
 
     selected = [0, 10]

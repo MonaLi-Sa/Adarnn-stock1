@@ -36,9 +36,13 @@ class Discriminator(nn.Module):
 def adv(source, target, input_dim=256, hidden_dim=512):
     domain_loss = nn.BCELoss()
     # !!! Pay attention to .cuda !!!
-    adv_net = Discriminator(input_dim, hidden_dim).cuda()
-    domain_src = torch.ones(len(source)).cuda()
-    domain_tar = torch.zeros(len(target)).cuda()
+    # adv_net = Discriminator(input_dim, hidden_dim).cuda()
+    # domain_src = torch.ones(len(source)).cuda()
+    # domain_tar = torch.zeros(len(target)).cuda()
+    #Removed for CUDA
+    adv_net = Discriminator(input_dim, hidden_dim)
+    domain_src = torch.ones(len(source))
+    domain_tar = torch.zeros(len(target))
     domain_src, domain_tar = domain_src.view(domain_src.shape[0], 1), domain_tar.view(domain_tar.shape[0], 1)
     reverse_src = ReverseLayerF.apply(source, 1)
     reverse_tar = ReverseLayerF.apply(target, 1)

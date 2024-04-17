@@ -27,9 +27,14 @@ def pprint(*text):
         print(time, *text, flush=True, file=f)
 
 
+# def get_model(name='AdaRNN'):
+#     n_hiddens = [args.hidden_size for i in range(args.num_layers)]
+#     return AdaRNN(use_bottleneck=True, bottleneck_width=64, n_input=args.d_feat, n_hiddens=n_hiddens,  n_output=args.class_num, dropout=args.dropout, model_type=name, len_seq=args.len_seq, trans_loss=args.loss_type).cuda()
+
+# Changed functionality to remove the cuda so that it can be used on mac 
 def get_model(name='AdaRNN'):
     n_hiddens = [args.hidden_size for i in range(args.num_layers)]
-    return AdaRNN(use_bottleneck=True, bottleneck_width=64, n_input=args.d_feat, n_hiddens=n_hiddens,  n_output=args.class_num, dropout=args.dropout, model_type=name, len_seq=args.len_seq, trans_loss=args.loss_type).cuda()
+    return AdaRNN(use_bottleneck=True, bottleneck_width=64, n_input=args.d_feat, n_hiddens=n_hiddens,  n_output=args.class_num, dropout=args.dropout, model_type=name, len_seq=args.len_seq, trans_loss=args.loss_type)
 
 
 def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None, weight_mat=None):
@@ -38,7 +43,8 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
     criterion_1 = nn.L1Loss()
     loss_all = []
     loss_1_all = []
-    dist_mat = torch.zeros(args.num_layers, args.len_seq).cuda()
+    # dist_mat = torch.zeros(args.num_layers, args.len_seq).cuda()
+    dist_mat = torch.zeros(args.num_layers, args.len_seq) #changed for cuda functionality 
     len_loader = np.inf
     for loader in train_loader_list:
         if len(loader) < len_loader:
@@ -48,8 +54,13 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
         list_feat = []
         list_label = []
         for data in data_all:
-            feature, label, label_reg = data[0].cuda().float(
-            ), data[1].cuda().long(), data[2].cuda().float()
+            # feature, label, label_reg = data[0].cuda().float(
+            # ), data[1].cuda().long(), data[2].cuda().float()
+            # list_feat.append(feature)
+            # list_label.append(label_reg)
+            #removing cuda
+            feature, label, label_reg = data[0].float(
+            ), data[1].long(), data[2].float()
             list_feat.append(feature)
             list_label.append(label_reg)
         flag = False
@@ -63,7 +74,8 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
         if flag:
             continue
 
-        total_loss = torch.zeros(1).cuda()
+        # total_loss = torch.zeros(1).cuda()
+        total_loss = torch.zeros(1)
         for i in range(len(index)):
             feature_s = list_feat[index[i][0]]
             feature_t = list_feat[index[i][1]]
@@ -254,7 +266,8 @@ def test_epoch(model, test_loader, prefix='Test'):
     criterion = nn.MSELoss()
     criterion_1 = nn.L1Loss()
     for feature, label, label_reg in tqdm(test_loader, desc=prefix, total=len(test_loader)):
-        feature, label_reg = feature.cuda().float(), label_reg.cuda().float()
+        # feature, label_reg = feature.cuda().float(), label_reg.cuda().float()
+        feature, label_reg = feature.float(), label_reg.float()
         with torch.no_grad():
             pred = model.predict(feature)
         loss = criterion(pred, label_reg)
@@ -279,7 +292,8 @@ def test_epoch_inference(model, test_loader, prefix='Test'):
     criterion_1 = nn.L1Loss()
     i = 0
     for feature, label, label_reg in tqdm(test_loader, desc=prefix, total=len(test_loader)):
-        feature, label_reg = feature.cuda().float(), label_reg.cuda().float()
+        # feature, label_reg = feature.cuda().float(), label_reg.cuda().float()
+        feature, label_reg = feature.float(), label_reg.float()
         with torch.no_grad():
             pred = model.predict(feature)
         loss = criterion(pred, label_reg)
@@ -328,7 +342,8 @@ def inference_all(output_path, model, model_path, loaders):
 
 
 def transform_type(init_weight):
-    weight = torch.ones(args.num_layers, args.len_seq).cuda()
+    # weight = torch.ones(args.num_layers, args.len_seq).cuda()
+    weight = torch.ones(args.num_layers, args.len_seq)
     for i in range(args.num_layers):
         for j in range(args.len_seq):
             weight[i, j] = init_weight[i][j].item()
@@ -346,8 +361,11 @@ def main_transfer(args):
     utils.dir_exist(output_path)
     pprint('create loaders...')
 
+    # train_loader_list, valid_loader, test_loader = data_process.load_weather_data_multi_domain(
+    #     args.data_path, args.batch_size, args.station, args.num_domain, args.data_mode)
+
     train_loader_list, valid_loader, test_loader = data_process.load_weather_data_multi_domain(
-        args.data_path, args.batch_size, args.station, args.num_domain, args.data_mode)
+        '/Users/chinu/Downloads/adarnn', args.batch_size, args.station, args.num_domain, args.data_mode)
 
     args.log_file = os.path.join(output_path, 'run.log')
     pprint('create model...')
