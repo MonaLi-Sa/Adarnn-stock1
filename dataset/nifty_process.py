@@ -36,7 +36,7 @@ def load_nifty_data(file_path, batch_size=6):
                                                 end_time='2024-01-25 15:29:00', batch_size=batch_size, mean=mean_train, std=std_train, shuffle=False)
     return train_loader, valid_train_loader, valid_vld_loader, test_loader
 
-def get_split_time(num_domain=4, mode='pre_process', data_file=None, dis_type='coral'):
+def get_split_time(num_domain = 4, mode='pre_process', data_file=None, dis_type='coral'):
     spilt_time = {
         '4': [('2015-03-06 09:15:00', '2016-12-31 15:29:00'), ('2017-01-03 09:15:00', '2018-12-28 15:29:00'),('2019-01-03 09:15:00', '2020-12-28 15:29:00'),('2021-01-03 09:15:00', '2021-12-28 15:29:00')]
     }
@@ -48,10 +48,14 @@ def get_split_time(num_domain=4, mode='pre_process', data_file=None, dis_type='c
         print("error in mode")
 
 def TDC(num_domain, data_file, dis_type='coral'):
+    # start_time = datetime.datetime.strptime(
+    #     '2015-02-02 09:15:00', '%Y-%m-%d %H:%M:%S')
+    # end_time = datetime.datetime.strptime(
+    #     '2022-02-02 09:15:00', '%Y-%m-%d %H:%M:%S')
     start_time = datetime.datetime.strptime(
-        '2015-02-02 09:15:00', '%Y-%m-%d %H:%M:%S')
+        '2015-02-02 00:00:00', '%Y-%m-%d %H:%M:%S')
     end_time = datetime.datetime.strptime(
-        '2022-02-02 09:15:00', '%Y-%m-%d %H:%M:%S')
+        '2022-02-02 00:00:00', '%Y-%m-%d %H:%M:%S')
     num_day = (end_time - start_time).days
     split_N = 10
     data = pd.read_pickle(data_file)
@@ -99,11 +103,12 @@ def TDC(num_domain, data_file, dis_type='coral'):
             else:
                 sel_start_time = start_time + datetime.timedelta(
                     days=int(num_day / split_N * selected[i - 1]) + 1, hours=9, minutes=15)
-            sel_end_time = start_time + datetime.timedelta(days=int(num_day / split_N * selected[i]), hours=15, minutes=30)
+            sel_end_time = start_time + datetime.timedelta(days=int(num_day / split_N * selected[i]), hours=15, minutes=29)
             sel_start_time = datetime.datetime.strftime(sel_start_time, '%Y-%m-%d %H:%M:%S')
             sel_end_time = datetime.datetime.strftime(sel_end_time, '%Y-%m-%d %H:%M:%S')
             res.append((sel_start_time, sel_end_time))
         pdb.set_trace()
+        print(res)
         return res
     else:
         print("error in number of domain")

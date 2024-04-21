@@ -48,8 +48,8 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
         list_feat = []
         list_label = []
         for data in data_all:
-            feature, label, label_reg = data[0].float(
-            ), data[1].long(), data[2].float()
+            feature, label = data['vwap'].float(
+            ), data['close'].long()
             list_feat.append(feature)
             list_label.append(label_reg)
         flag = False

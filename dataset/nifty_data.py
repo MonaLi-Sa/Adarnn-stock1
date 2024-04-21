@@ -4,6 +4,7 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torch
 import datetime
+import pdb
 
 class NiftyReturnsDataset(Dataset):
     def __init__(self, returns_data, labels, t=None):
@@ -21,6 +22,24 @@ class NiftyReturnsDataset(Dataset):
 
     def __len__(self):
         return len(self.returns_data)
+
+def create_dataset(df, start_date, end_date, mean=None, std=None):
+    data=df
+    label = data['close']
+    feat=data['vwap']
+    referece_start_time=datetime.datetime(2015, 2, 2, 9, 15,0)
+    referece_end_time=datetime.datetime(2024, 1, 25, 15, 29, 0)
+
+    assert (pd.to_datetime(start_date) - referece_start_time).days >= 0
+    assert (pd.to_datetime(end_date) - referece_end_time).days <= 0
+    assert (pd.to_datetime(end_date) - pd.to_datetime(start_date)).days >= 0
+    index_start=(pd.to_datetime(start_date) - referece_start_time).days
+    index_end=(pd.to_datetime(end_date) - referece_start_time).days
+    feat=feat[index_start: index_end + 1]
+    label=label[index_start: index_end + 1]
+    # label_reg=label_reg[index_start: index_end + 1]
+
+    return NiftyReturnsDataset(feat, label)
 
 def load_nifty_returns_data(file_path, start_date, end_date, batch_size=32, shuffle=True):
     df = pd.read_pickle (file_path)  # Assuming the data is stored in a CSV file
@@ -40,7 +59,9 @@ def load_nifty_returns_data(file_path, start_date, end_date, batch_size=32, shuf
 
 def get_nifty_data(data_file, start_time, end_time, batch_size, shuffle=True, mean=None, std=None):
     df=pd.read_pickle(data_file)
-
+    pdb.set_trace()
+    print(start_time)
+    print(end_time)
     dataset=create_dataset(df, start_time,
                              end_time, mean=mean, std=std)
     train_loader=DataLoader(
@@ -50,11 +71,6 @@ def get_nifty_data(data_file, start_time, end_time, batch_size, shuffle=True, me
 
 def compute_nifty_returns_statistic(file_path, start_date, end_date):
     df = pd.read_pickle(file_path) 
-    # df = df.loc[start_date:end_date] #will only work if the datetime is there in your index
-    # returns_data = df['close'].values.astype(np.float32)
-    # mu_train = np.mean(returns_data)
-    # sigma_train = np.std(returns_data)
-
     feat, label = df['vwap'], df['close']
     referece_start_time=datetime.datetime(2015, 2, 2, 9, 15,0)
     referece_end_time=datetime.datetime(2022, 2, 2, 15, 29,0)
