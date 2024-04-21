@@ -349,7 +349,7 @@ def main_transfer(args):
     pprint('create loaders...')
 
     train_loader_list, valid_loader, test_loader = nifty_process.load_nifty_data_multi_domain(
-        '/Users/chinu/Downloads/adarnn', args.batch_size, args.station, args.num_domain, args.data_mode)
+        '/Users/chinu/Downloads/adarnn', args.batch_size, args.num_domain, args.data_mode)
 
     args.log_file = os.path.join(output_path, 'run.log')
     pprint('create model...')
@@ -436,7 +436,6 @@ def get_args():
     parser.add_argument('--batch_size', type=int, default=36)
     parser.add_argument('--dw', type=float, default=0.5) # 0.01, 0.05, 5.0
     parser.add_argument('--loss_type', type=str, default='adv')
-    parser.add_argument('--station', type=str, default='Dongsi')
     parser.add_argument('--data_mode', type=str,
                         default='tdc')
     parser.add_argument('--num_domain', type=int, default=2)
@@ -444,7 +443,6 @@ def get_args():
 
     # other
     parser.add_argument('--seed', type=int, default=10)
-    parser.add_argument('--data_path', default="/root/Messi_du/adarnn/")
     parser.add_argument('--outdir', default='./outputs')
     parser.add_argument('--overwrite', action='store_true')
     parser.add_argument('--log_file', type=str, default='run.log')

@@ -6,6 +6,7 @@ import datetime
 from base.loss_transfer import TransferLoss
 import torch
 import math
+import pdb
 from dataset import nifty_process
 
 def load_act_data(data_folder, batch_size=64, domain="1_20"):
@@ -54,12 +55,12 @@ def TDC(num_domain, data_file, dis_type='coral'):
     num_day = (end_time - start_time).days
     split_N = 10
     data = pd.read_pickle(data_file)
-    feat = data[0][0:num_day]
-    feat = torch.tensor(feat, dtype=torch.float32)
+    feat = data.drop(['close'],axis=1)
+    feat = torch.tensor(feat.values, dtype=torch.float32)
     feat_shape_1 = feat.shape[1]
-    feat = feat.reshape(-1, feat.shape[2])
+    #feat = feat.reshape(-1, feat.shape[2])
     if torch.cuda.is_available():
-        feat = feat.cuda()
+        feat = feat
     else:
         print("CUDA is not available. Running on CPU.")
 
@@ -102,14 +103,15 @@ def TDC(num_domain, data_file, dis_type='coral'):
             sel_start_time = datetime.datetime.strftime(sel_start_time, '%Y-%m-%d %H:%M:%S')
             sel_end_time = datetime.datetime.strftime(sel_end_time, '%Y-%m-%d %H:%M:%S')
             res.append((sel_start_time, sel_end_time))
+        pdb.set_trace()
         return res
     else:
         print("error in number of domain")
 
 def load_nifty_data_multi_domain(file_path, batch_size=6, number_domain=2, mode='pre_process', dis_type='coral'):
     data_file = os.path.join(file_path, "nifty_1.pkl")
-    mean_train, std_train = nifty_data.compute_nifty_returns_statistic(data_file, start_time='2013-3-1 0:0',
-                                                                    end_time='2016-10-30 23:0')
+    mean_train, std_train = nifty_data.compute_nifty_returns_statistic(data_file, start_date='2015-02-02 09:15:00',
+                                                                    end_date='2022-02-02 15:29:00')
     split_time_list = get_split_time(number_domain, mode=mode, data_file=data_file, dis_type=dis_type)
     train_list = []
     for i in range(len(split_time_list)):
@@ -123,4 +125,7 @@ def load_nifty_data_multi_domain(file_path, batch_size=6, number_domain=2, mode=
     test_loader = nifty_data.get_nifty_data(data_file, start_time='2022-03-04 09:15:00',
                                                 end_time='2024-01-25 15:29:00', batch_size=batch_size, mean=mean_train, std=std_train, shuffle=False)
     return train_list, valid_vld_loader, test_loader
+
+def dummy_debug(file_path):
+    pd.read_pickle(file_path)
 

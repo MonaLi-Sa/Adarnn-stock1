@@ -39,7 +39,7 @@ def adv(source, target, input_dim=256, hidden_dim=512):
     # adv_net = Discriminator(input_dim, hidden_dim).cuda()
     # domain_src = torch.ones(len(source)).cuda()
     # domain_tar = torch.zeros(len(target)).cuda()
-    #Removed for CUDA
+    #Removed for
     adv_net = Discriminator(input_dim, hidden_dim)
     domain_src = torch.ones(len(source))
     domain_tar = torch.zeros(len(target))

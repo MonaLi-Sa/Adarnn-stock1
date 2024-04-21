@@ -53,6 +53,11 @@ def get_split_time(num_domain=2, mode='pre_process', data_file = None, station =
 
 def TDC(num_domain, data_file, station, dis_type = 'coral'):
     
+    # start_time = datetime.datetime.strptime(
+    #         '2013-03-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+    # end_time = datetime.datetime.strptime(
+    #         '2016-06-30 23:00:00', '%Y-%m-%d %H:%M:%S')
+    #Customizing the dataset according to the time series we want.
     start_time = datetime.datetime.strptime(
             '2013-03-01 00:00:00', '%Y-%m-%d %H:%M:%S')
     end_time = datetime.datetime.strptime(
@@ -109,6 +114,7 @@ def TDC(num_domain, data_file, station, dis_type = 'coral'):
             sel_start_time = datetime.datetime.strftime(sel_start_time,'%Y-%m-%d %H:%M')
             sel_end_time = datetime.datetime.strftime(sel_end_time,'%Y-%m-%d %H:%M')
             res.append((sel_start_time, sel_end_time))
+        print("Hello world")
         return res
     else:
         print("error in number of domain")

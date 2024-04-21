@@ -19,6 +19,7 @@ import torch
 #     return loss
 
 # Commenting down the actual implementation in order for it to work on Mac
+
 def CORAL(source, target):
     d = source.size(1)
     ns, nt = source.size(0), target.size(0)

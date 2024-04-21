@@ -123,7 +123,8 @@ def train_epoch_transfer_Boosting(model, optimizer, train_loader_list, epoch, di
     criterion_1 = nn.L1Loss()
     loss_all = []
     loss_1_all = []
-    dist_mat = torch.zeros(args.num_layers, args.len_seq).cuda()
+    # dist_mat = torch.zeros(args.num_layers, args.len_seq).cuda()
+    dist_mat = torch.zeros(args.num_layers, args.len_seq) #removing for cpu functionality on mac
     len_loader = np.inf
     for loader in train_loader_list:
         if len(loader) < len_loader:
@@ -133,8 +134,12 @@ def train_epoch_transfer_Boosting(model, optimizer, train_loader_list, epoch, di
         list_feat = []
         list_label = []
         for data in data_all:
-            feature, label, label_reg = data[0].cuda().float(
-            ), data[1].cuda().long(), data[2].cuda().float()
+            # feature, label, label_reg = data[0].cuda().float(
+            # ), data[1].cuda().long(), data[2].cuda().float()
+            # list_feat.append(feature)
+            # list_label.append(label_reg)
+            feature, label, label_reg = data[0].float(
+            ), data[1].long(), data[2].float()
             list_feat.append(feature)
             list_label.append(label_reg)
         flag = False
@@ -148,7 +153,8 @@ def train_epoch_transfer_Boosting(model, optimizer, train_loader_list, epoch, di
         if flag:
             continue
 
-        total_loss = torch.zeros(1).cuda()
+        # total_loss = torch.zeros(1).cuda()
+        total_loss = torch.zeros(1)
         for i in range(len(index)):
             feature_s = list_feat[index[i][0]]
             feature_t = list_feat[index[i][1]]
@@ -207,8 +213,12 @@ def train_epoch_transfer(args, model, optimizer, train_loader_list):
         list_feat = []
         list_label = []
         for data in data_all:
-            feature, label, label_reg = data[0].cuda().float(
-            ), data[1].cuda().long(), data[2].cuda().float()
+            # feature, label, label_reg = data[0].cuda().float(
+            # ), data[1].cuda().long(), data[2].cuda().float()
+            # list_feat.append(feature)
+            # list_label.append(label_reg)
+            feature, label, label_reg = data[0].float(
+            ), data[1].long(), data[2].float()
             list_feat.append(feature)
             list_label.append(label_reg)
         flag = False
@@ -223,7 +233,7 @@ def train_epoch_transfer(args, model, optimizer, train_loader_list):
             continue
 
         ###############
-        total_loss = torch.zeros(1).cuda()
+        total_loss = torch.zeros(1)
         for i in range(len(index)):
             feature_s = list_feat[index[i][0]]
             feature_t = list_feat[index[i][1]]

@@ -152,7 +152,7 @@ class AdaRNN(nn.Module):
         else:
             weight = weight_mat
         # dist_mat = torch.zeros(self.num_layers, self.len_seq).cuda()
-        dist_mat = torch.zeros(self.num_layers, self.len_seq)
+        dist_mat = torch.zeros(self.num_layers, self.len_seq).cuda()
         for i in range(len(out_list_s)):
             criterion_transder = TransferLoss(
                 loss_type=self.trans_loss, input_dim=out_list_s[i].shape[2])
