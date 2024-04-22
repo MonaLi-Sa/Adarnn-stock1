@@ -30,20 +30,34 @@ class NiftyReturnsDataset(Dataset):
 
 def create_dataset(df, start_date, end_date, mean=None, std=None):
     data=df
+    pdb.set_trace()
+    print(data[0])
+    print(data[1])
     label = data[1]
     feat=data[0]
     referece_start_time=datetime.datetime(2015, 2, 2, 9, 15,0)
     referece_end_time=datetime.datetime(2024, 1, 23, 15, 29, 0)
+    pdb.set_trace()
     print(start_date)
     print(end_date)
+    
     assert (pd.to_datetime(start_date) - referece_start_time).days >= 0
     assert (pd.to_datetime(end_date) - referece_end_time).days <= 0
     assert (pd.to_datetime(end_date) - pd.to_datetime(start_date)).days >= 0
     index_start=(pd.to_datetime(start_date) - referece_start_time).days
     index_end=(pd.to_datetime(end_date) - referece_start_time).days
+    pdb.set_trace()
+    print(index_end)
+    print(index_start)
+    print(f'*Length of Features {len(feat)}')
+    print(f'*{index_end-index_start}')
+    print(f'*{len(feat)-index_start}')
     feat=feat[index_start: index_end + 1]
     label=label[index_start: index_end + 1]
-    # feat2=feat2[index_start: index_end + 1]
+
+    pdb.set_trace()
+    print(label)
+    print(feat)
 
     return NiftyReturnsDataset(label, feat)
 

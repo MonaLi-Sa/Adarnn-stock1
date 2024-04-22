@@ -63,14 +63,14 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
 
         flag = False
         index = get_index(len(data_all) - 1)
-        print(index)
+        # print(index)
         for temp_index in index:
             s1 = temp_index[0]
             s2 = temp_index[1]
-            print(s1)
-            print(s2)
-            print(list_feat[s1].shape[0])
-            print(list_feat[s2].shape[0])
+            # print(s1)
+            # print(s2)
+            # print(list_feat[s1].shape[0])
+            # print(list_feat[s2].shape[0])
             if list_feat[s1].shape[0] != list_feat[s2].shape[0]:
                 flag = True
                 break
@@ -298,6 +298,9 @@ def test_epoch(model, test_loader, prefix='Test'):
         total_loss += loss.item()
         total_loss_1 += loss_1.item()
         total_loss_r += loss_r.item()
+    pdb.set_trace()
+    print(test_loader)
+    print(len(test_loader))
     loss = total_loss / len(test_loader)
     loss_1 = total_loss_1 / len(test_loader)
     loss_r = loss_r / len(test_loader)
@@ -424,6 +427,9 @@ def main_transfer(args):
             model, train_loader_list[0], prefix='Train')
         # val_loss, val_loss_l1, val_loss_r = test_epoch(
         #     model, valid_loader, prefix='Valid')
+        pdb.set_trace()
+        print(test_loader)
+        print(len(test_loader))
         test_loss, test_loss_l1, test_loss_r = test_epoch(
             model, test_loader, prefix='Test')
 
