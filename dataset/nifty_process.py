@@ -36,7 +36,7 @@ def load_nifty_data(file_path, batch_size=6):
                                                 end_time='2024-01-25 15:29:00', batch_size=batch_size, mean=mean_train, std=std_train, shuffle=False)
     return train_loader, valid_train_loader, valid_vld_loader, test_loader
 
-def get_split_time(num_domain = 4, mode='pre_process', data_file=None, dis_type='coral'):
+def get_split_time(num_domain = 2, mode='pre_process', data_file=None, dis_type='coral'):
     spilt_time = {
         '4': [('2015-03-06 09:15:00', '2016-12-31 15:29:00'), ('2017-01-03 09:15:00', '2018-12-28 15:29:00'),('2019-01-03 09:15:00', '2020-12-28 15:29:00'),('2021-01-03 09:15:00', '2021-12-28 15:29:00')]
     }
@@ -59,10 +59,10 @@ def TDC(num_domain, data_file, dis_type='coral'):
     num_day = (end_time - start_time).days
     split_N = 10
     data = pd.read_pickle(data_file)
-    feat = data.drop(['close'],axis=1)
-    feat = torch.tensor(feat.values, dtype=torch.float32)
+    feat =data[0][0:num_day]
+    feat = torch.tensor(feat, dtype=torch.float32)
     feat_shape_1 = feat.shape[1]
-    #feat = feat.reshape(-1, feat.shape[2])
+    feat = feat.reshape(-1, feat.shape[2])
     if torch.cuda.is_available():
         feat = feat
     else:
@@ -123,13 +123,17 @@ def load_nifty_data_multi_domain(file_path, batch_size=6, number_domain=2, mode=
         time_temp = split_time_list[i]
         train_loader = nifty_data.get_nifty_data(data_file, start_time=time_temp[0],
                                                      end_time=time_temp[1], batch_size=batch_size, mean=mean_train, std=std_train)
+        
         train_list.append(train_loader)
 
-    valid_vld_loader = nifty_data.get_nifty_data(data_file, start_time='2022-02-03 09:15:00',
-                                                     end_time='2022-03-03 15:29:00', batch_size=batch_size, mean=mean_train, std=std_train)
-    test_loader = nifty_data.get_nifty_data(data_file, start_time='2022-03-04 09:15:00',
-                                                end_time='2024-01-25 15:29:00', batch_size=batch_size, mean=mean_train, std=std_train, shuffle=False)
-    return train_list, valid_vld_loader, test_loader
+    pdb.set_trace()
+    print(train_list)
+
+    # valid_vld_loader = nifty_data.get_nifty_data(data_file, start_time='2022-02-08 09:15:00',
+    #                                                  end_time='2022-10-03 15:29:00', batch_size=batch_size, mean=mean_train, std=std_train)
+    test_loader = nifty_data.get_nifty_data(data_file, start_time='2022-11-04 09:15:00',
+                                                end_time='2024-01-23 15:29:00', batch_size=batch_size, mean=mean_train, std=std_train, shuffle=False)
+    return train_list, test_loader
 
 def dummy_debug(file_path):
     pd.read_pickle(file_path)

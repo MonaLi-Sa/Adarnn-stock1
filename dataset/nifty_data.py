@@ -11,10 +11,15 @@ class NiftyReturnsDataset(Dataset):
         assert len(returns_data) == len(labels)
         self.returns_data = returns_data
         self.labels = labels
+
         self.T = t
+        self.returns_data=torch.tensor(
+            self.returns_data, dtype=torch.float32)
+        self.labels=torch.tensor(
+            self.labels, dtype=torch.float32)
 
     def __getitem__(self, index):
-        sample, target = self.returns_data[index], self.labels[index]
+        target, sample= self.returns_data[index], self.labels[index]
         if self.T:
             return self.T(sample), target
         else:
@@ -25,11 +30,12 @@ class NiftyReturnsDataset(Dataset):
 
 def create_dataset(df, start_date, end_date, mean=None, std=None):
     data=df
-    label = data['close']
-    feat=data['vwap']
+    label = data[1]
+    feat=data[0]
     referece_start_time=datetime.datetime(2015, 2, 2, 9, 15,0)
-    referece_end_time=datetime.datetime(2024, 1, 25, 15, 29, 0)
-
+    referece_end_time=datetime.datetime(2024, 1, 23, 15, 29, 0)
+    print(start_date)
+    print(end_date)
     assert (pd.to_datetime(start_date) - referece_start_time).days >= 0
     assert (pd.to_datetime(end_date) - referece_end_time).days <= 0
     assert (pd.to_datetime(end_date) - pd.to_datetime(start_date)).days >= 0
@@ -37,9 +43,9 @@ def create_dataset(df, start_date, end_date, mean=None, std=None):
     index_end=(pd.to_datetime(end_date) - referece_start_time).days
     feat=feat[index_start: index_end + 1]
     label=label[index_start: index_end + 1]
-    # label_reg=label_reg[index_start: index_end + 1]
+    # feat2=feat2[index_start: index_end + 1]
 
-    return NiftyReturnsDataset(feat, label)
+    return NiftyReturnsDataset(label, feat)
 
 def load_nifty_returns_data(file_path, start_date, end_date, batch_size=32, shuffle=True):
     df = pd.read_pickle (file_path)  # Assuming the data is stored in a CSV file
@@ -59,11 +65,9 @@ def load_nifty_returns_data(file_path, start_date, end_date, batch_size=32, shuf
 
 def get_nifty_data(data_file, start_time, end_time, batch_size, shuffle=True, mean=None, std=None):
     df=pd.read_pickle(data_file)
-    pdb.set_trace()
-    print(start_time)
-    print(end_time)
     dataset=create_dataset(df, start_time,
                              end_time, mean=mean, std=std)
+    pdb.set_trace()
     train_loader=DataLoader(
         dataset, batch_size=batch_size, shuffle=shuffle)
     return train_loader
@@ -71,7 +75,7 @@ def get_nifty_data(data_file, start_time, end_time, batch_size, shuffle=True, me
 
 def compute_nifty_returns_statistic(file_path, start_date, end_date):
     df = pd.read_pickle(file_path) 
-    feat, label = df['vwap'], df['close']
+    feat, label= df[0], df[1]
     referece_start_time=datetime.datetime(2015, 2, 2, 9, 15,0)
     referece_end_time=datetime.datetime(2022, 2, 2, 15, 29,0)
 
@@ -82,7 +86,7 @@ def compute_nifty_returns_statistic(file_path, start_date, end_date):
     index_end=(pd.to_datetime(end_date) - referece_start_time).days
     feat=feat[index_start: index_end + 1]
     label=label[index_start: index_end + 1]
-    # feat=feat.reshape(-1, feat.shape[2])
+    feat=feat.reshape(-1, feat.shape[2])
     mu_train=np.mean(feat, axis=0)
     sigma_train=np.std(feat, axis=0)
 

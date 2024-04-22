@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from base.loss_transfer import TransferLoss
 import torch.nn.functional as F
+import pdb
 
 
 class AdaRNN(nn.Module):
@@ -100,6 +101,9 @@ class AdaRNN(nn.Module):
 
     def gru_features(self, x, predict=False):
         x_input = x
+        pdb.set_trace()
+        print(x_input.shape)
+        print(x_input)
         out = None
         out_lis = []
         out_weight_list = [] if (
@@ -118,6 +122,8 @@ class AdaRNN(nn.Module):
         x_t = out[out.shape[0]//2: out.shape[0]]
         x_all = torch.cat((x_s, x_t), 2)
         x_all = x_all.view(x_all.shape[0], -1)
+        pdb.set_trace()
+        print(x_all.shape)
         weight = torch.sigmoid(self.bn_lst[index](
             self.gate[index](x_all.float())))
         weight = torch.mean(weight, dim=0)

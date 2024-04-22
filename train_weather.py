@@ -14,6 +14,7 @@ from base.AdaRNN import AdaRNN
 import pretty_errors
 import dataset.data_process as data_process
 import matplotlib.pyplot as plt
+import pdb
 
 
 def pprint(*text):
@@ -68,6 +69,10 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
         for temp_index in index:
             s1 = temp_index[0]
             s2 = temp_index[1]
+            print(s1)
+            print(s2)
+            print(list_feat[s1].shape[0])
+            print(list_feat[s2].shape[0])
             if list_feat[s1].shape[0] != list_feat[s2].shape[0]:
                 flag = True
                 break
@@ -83,9 +88,20 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
             label_reg_t = list_label[index[i][1]]
             feature_all = torch.cat((feature_s, feature_t), 0)
 
+            #debugger block
+            pdb.set_trace()
+            print(feature_s)
+            pdb.set_trace()
+            print(feature_t)
+            pdb.set_trace()
+            print(feature_all)
+
+
             if epoch < args.pre_epoch:
                 pred_all, loss_transfer, out_weight_list = model.forward_pre_train(
                     feature_all, len_win=args.len_win)
+                pdb.set_trace()
+                print(out_weight_list)
             else:
                 pred_all, loss_transfer, dist, weight_mat = model.forward_Boosting(
                     feature_all, weight_mat)

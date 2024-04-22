@@ -14,6 +14,8 @@ from base.AdaRNN import AdaRNN
 import pretty_errors
 import dataset.nifty_process as nifty_process
 import matplotlib.pyplot as plt
+import pdb
+import pickle
 
 
 def pprint(*text):
@@ -48,15 +50,27 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
         list_feat = []
         list_label = []
         for data in data_all:
-            feature, label = data['vwap'].float(
-            ), data['close'].long()
+            feature, label = data[0].float(
+            ), data[1].long()
+            print(data[0].shape)
+            print(data[1].shape)
             list_feat.append(feature)
-            list_label.append(label_reg)
+            # list_label.append(label_reg)
+        
+        pdb.set_trace()
+        print(list_feat)
+        print(list_label)
+
         flag = False
         index = get_index(len(data_all) - 1)
+        print(index)
         for temp_index in index:
             s1 = temp_index[0]
             s2 = temp_index[1]
+            print(s1)
+            print(s2)
+            print(list_feat[s1].shape[0])
+            print(list_feat[s2].shape[0])
             if list_feat[s1].shape[0] != list_feat[s2].shape[0]:
                 flag = True
                 break
@@ -67,13 +81,23 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
         for i in range(len(index)):
             feature_s = list_feat[index[i][0]]
             feature_t = list_feat[index[i][1]]
-            label_reg_s = list_label[index[i][0]]
-            label_reg_t = list_label[index[i][1]]
+            # label_reg_s = list_label[index[i][0]]
+            # label_reg_t = list_label[index[i][1]]
             feature_all = torch.cat((feature_s, feature_t), 0)
+
+             #debugger block
+            pdb.set_trace()
+            print(feature_s)
+            pdb.set_trace()
+            print(feature_t)
+            pdb.set_trace()
+            print(feature_all)
 
             if epoch < args.pre_epoch:
                 pred_all, loss_transfer, out_weight_list = model.forward_pre_train(
                     feature_all, len_win=args.len_win)
+                pdb.set_trace()
+                print(out_weight_list)
             else:
                 pred_all, loss_transfer, dist, weight_mat = model.forward_Boosting(
                     feature_all, weight_mat)
@@ -84,6 +108,10 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
             loss_s = criterion(pred_s, label_reg_s)
             loss_t = criterion(pred_t, label_reg_t)
             loss_l1 = criterion_1(pred_s, label_reg_s)
+            loss_s = criterion(pred_s)
+            loss_t = criterion(pred_t)
+            loss_l1 = criterion_1(pred_s)
+
 
             total_loss = total_loss + loss_s + loss_t + args.dw * loss_transfer
         loss_all.append(
@@ -281,7 +309,7 @@ def test_epoch_inference(model, test_loader, prefix='Test'):
     i = 0
     for feature, label, label_reg in tqdm(test_loader, desc=prefix, total=len(test_loader)):
         # feature, label_reg = feature.float(), label_reg.float()
-        feature, label_reg = feature.float(), label_reg.float()
+        feature, label, label_reg = feature.float(), label_reg.float()
         with torch.no_grad():
             pred = model.predict(feature)
         loss = criterion(pred, label_reg)
@@ -348,7 +376,10 @@ def main_transfer(args):
     utils.dir_exist(output_path)
     pprint('create loaders...')
 
-    train_loader_list, valid_loader, test_loader = nifty_process.load_nifty_data_multi_domain(
+    # train_loader_list, valid_loader, test_loader = nifty_process.load_nifty_data_multi_domain(
+    #     '/Users/chinu/Downloads/adarnn', args.batch_size, args.num_domain, args.data_mode)
+
+    train_loader_list,test_loader = nifty_process.load_nifty_data_multi_domain(
         '/Users/chinu/Downloads/adarnn', args.batch_size, args.num_domain, args.data_mode)
 
     args.log_file = os.path.join(output_path, 'run.log')
@@ -362,8 +393,13 @@ def main_transfer(args):
     best_score = np.inf
     best_epoch, stop_round = 0, 0
     weight_mat, dist_mat = None, None
+    pdb.set_trace()
+    file_path = "my_list.pkl" #saving the trai_loader_list
+    with open(file_path, 'wb') as f:
+        pickle.dump(train_loader_list, f)
 
-
+    print("List saved as pickle file successfully.")
+    print(train_loader_list)
     for epoch in range(args.n_epochs):
         pprint('Epoch:', epoch)
         pprint('training...')
@@ -380,13 +416,14 @@ def main_transfer(args):
         pprint('evaluating...')
         train_loss, train_loss_l1, train_loss_r = test_epoch(
             model, train_loader_list[0], prefix='Train')
-        val_loss, val_loss_l1, val_loss_r = test_epoch(
-            model, valid_loader, prefix='Valid')
+        # val_loss, val_loss_l1, val_loss_r = test_epoch(
+        #     model, valid_loader, prefix='Valid')
         test_loss, test_loss_l1, test_loss_r = test_epoch(
             model, test_loader, prefix='Test')
 
-        pprint('valid %.6f, test %.6f' %
-               (val_loss_l1, test_loss_l1))
+        # pprint('valid %.6f, test %.6f' %
+        #        (val_loss_l1, test_loss_l1))
+        pprint('valid %.6f' % test_loss_l1)
 
         if val_loss < best_score:
             best_score = val_loss
@@ -402,15 +439,23 @@ def main_transfer(args):
 
     pprint('best val score:', best_score, '@', best_epoch)
 
-    loaders = train_loader_list[0], valid_loader, test_loader
+    # loaders = train_loader_list[0], valid_loader, test_loader
+    loaders = train_loader_list[0], test_loader
     loss_list, loss_l1_list, loss_r_list = inference_all(output_path, model, os.path.join(
         output_path, save_model_name), loaders)
-    pprint('MSE: train %.6f, valid %.6f, test %.6f' %
-           (loss_list[0], loss_list[1], loss_list[2]))
-    pprint('L1:  train %.6f, valid %.6f, test %.6f' %
-           (loss_l1_list[0], loss_l1_list[1], loss_l1_list[2]))
-    pprint('RMSE: train %.6f, valid %.6f, test %.6f' %
-           (loss_r_list[0], loss_r_list[1], loss_r_list[2]))
+    # pprint('MSE: train %.6f, valid %.6f, test %.6f' %
+    #        (loss_list[0], loss_list[1], loss_list[2]))
+    # pprint('L1:  train %.6f, valid %.6f, test %.6f' %
+    #        (loss_l1_list[0], loss_l1_list[1], loss_l1_list[2]))
+    # pprint('RMSE: train %.6f, valid %.6f, test %.6f' %
+    #        (loss_r_list[0], loss_r_list[1], loss_r_list[2]))
+    # pprint('Finished.')
+    pprint('MSE: train %.6f, test %.6f' %
+           (loss_list[0],loss_list[1]))
+    pprint('L1:  train %.6f, test %.6f' %
+           (loss_l1_list[0], loss_l1_list[1]))
+    pprint('RMSE: train %.6f,test %.6f' %
+           (loss_r_list[0], loss_r_list[1]))
     pprint('Finished.')
 
 
@@ -420,7 +465,7 @@ def get_args():
 
     # model
     parser.add_argument('--model_name', default='AdaRNN')
-    parser.add_argument('--d_feat', type=int, default=6)
+    parser.add_argument('--d_feat', type=int, default=9)
 
     parser.add_argument('--hidden_size', type=int, default=64)
     parser.add_argument('--num_layers', type=int, default=2)
@@ -432,7 +477,7 @@ def get_args():
     parser.add_argument('--n_epochs', type=int, default=200)
     parser.add_argument('--lr', type=float, default=5e-4)
     parser.add_argument('--early_stop', type=int, default=40)
-    parser.add_argument('--smooth_steps', type=int, default=5)
+    parser.add_argument('--smooth_steps', type=int, default=3)
     parser.add_argument('--batch_size', type=int, default=36)
     parser.add_argument('--dw', type=float, default=0.5) # 0.01, 0.05, 5.0
     parser.add_argument('--loss_type', type=str, default='adv')

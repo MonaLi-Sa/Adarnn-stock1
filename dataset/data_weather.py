@@ -9,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 import pickle
 import datetime
-
+import pdb
 
 
 class data_loader(Dataset):
@@ -62,6 +62,10 @@ def create_dataset(df, station, start_date, end_date, mean=None, std=None):
     # feat=(feat - mean) / std
     # feat=feat.reshape(-1, ori_shape_1, ori_shape_2)
 
+    pdb.set_trace()
+    print(feat)
+    print(feat.shape)
+
     return data_loader(feat, label, label_reg)
 
 
@@ -85,6 +89,10 @@ def create_dataset_shallow(df, station, start_date, end_date, mean=None, std=Non
     # feat=feat.reshape(-1, feat.shape[2])
     # feat=(feat - mean) / std
     # feat=feat.reshape(-1, ori_shape_1, ori_shape_2)
+
+    pdb.set_trace()
+    print(feat)
+    print(feat.shape)
 
     return feat,  label_reg
 
@@ -132,6 +140,3 @@ def get_weather_data_statistic(data_file, station, start_time, end_time):
     mean_train, std_train =get_dataset_statistic(
         df, station, start_time, end_time)
     return mean_train, std_train
-
-    /Users/chi
-
