@@ -107,8 +107,8 @@ def TDC(num_domain, data_file, dis_type='coral'):
             sel_start_time = datetime.datetime.strftime(sel_start_time, '%Y-%m-%d %H:%M:%S')
             sel_end_time = datetime.datetime.strftime(sel_end_time, '%Y-%m-%d %H:%M:%S')
             res.append((sel_start_time, sel_end_time))
-        pdb.set_trace()
-        print(res)
+        # pdb.set_trace()
+        # print(res)
         return res
     else:
         print("error in number of domain")
@@ -126,8 +126,8 @@ def load_nifty_data_multi_domain(file_path, batch_size=6, number_domain=2, mode=
         
         train_list.append(train_loader)
 
-    pdb.set_trace()
-    print(train_list)
+    # pdb.set_trace()
+    # print(train_list)
 
     # valid_vld_loader = nifty_data.get_nifty_data(data_file, start_time='2022-02-08 09:15:00',
     #                                                  end_time='2022-10-03 15:29:00', batch_size=batch_size, mean=mean_train, std=std_train)

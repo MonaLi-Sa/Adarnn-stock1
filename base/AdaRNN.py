@@ -101,9 +101,9 @@ class AdaRNN(nn.Module):
 
     def gru_features(self, x, predict=False):
         x_input = x
-        pdb.set_trace()
-        print(x_input.shape)
-        print(x_input)
+        # pdb.set_trace()
+        # print(x_input.shape)
+        # print(x_input)
         out = None
         out_lis = []
         out_weight_list = [] if (
@@ -113,6 +113,9 @@ class AdaRNN(nn.Module):
             x_input = out
             out_lis.append(out)
             if self.model_type == 'AdaRNN' and predict == False:
+                # pdb.set_trace()
+                # print(x_input.shape)
+                # print(i)
                 out_gate = self.process_gate_weight(x_input, i)
                 out_weight_list.append(out_gate)
         return out, out_lis, out_weight_list
@@ -122,10 +125,9 @@ class AdaRNN(nn.Module):
         x_t = out[out.shape[0]//2: out.shape[0]]
         x_all = torch.cat((x_s, x_t), 2)
         x_all = x_all.view(x_all.shape[0], -1)
-        pdb.set_trace()
-        print(x_all.shape)
-        weight = torch.sigmoid(self.bn_lst[index](
-            self.gate[index](x_all.float())))
+        # pdb.set_trace()
+        # print(x_all.shape)
+        weight = torch.sigmoid(self.bn_lst[index](self.gate[index](x_all.float())))
         weight = torch.mean(weight, dim=0)
         res = self.softmax(weight).squeeze()
         return res

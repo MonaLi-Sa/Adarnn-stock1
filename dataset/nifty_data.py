@@ -67,7 +67,7 @@ def get_nifty_data(data_file, start_time, end_time, batch_size, shuffle=True, me
     df=pd.read_pickle(data_file)
     dataset=create_dataset(df, start_time,
                              end_time, mean=mean, std=std)
-    pdb.set_trace()
+    # pdb.set_trace()
     train_loader=DataLoader(
         dataset, batch_size=batch_size, shuffle=shuffle)
     return train_loader

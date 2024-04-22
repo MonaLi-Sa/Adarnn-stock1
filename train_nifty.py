@@ -50,16 +50,16 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
         list_feat = []
         list_label = []
         for data in data_all:
-            feature, label = data[0].float(
-            ), data[1].long()
+            feature, label_reg = data[0].float(
+            ), data[1].float()
             print(data[0].shape)
             print(data[1].shape)
             list_feat.append(feature)
-            # list_label.append(label_reg)
+            list_label.append(label_reg)
         
-        pdb.set_trace()
-        print(list_feat)
-        print(list_label)
+        # pdb.set_trace()
+        # print(list_feat)
+        # print(list_label)
 
         flag = False
         index = get_index(len(data_all) - 1)
@@ -81,23 +81,23 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
         for i in range(len(index)):
             feature_s = list_feat[index[i][0]]
             feature_t = list_feat[index[i][1]]
-            # label_reg_s = list_label[index[i][0]]
-            # label_reg_t = list_label[index[i][1]]
+            label_reg_s = list_label[index[i][0]]
+            label_reg_t = list_label[index[i][1]]
             feature_all = torch.cat((feature_s, feature_t), 0)
 
              #debugger block
-            pdb.set_trace()
-            print(feature_s)
-            pdb.set_trace()
-            print(feature_t)
-            pdb.set_trace()
-            print(feature_all)
+            # pdb.set_trace()
+            # print(feature_s)
+            # pdb.set_trace()
+            # print(feature_t)
+            # pdb.set_trace()
+            # print(feature_all)
 
             if epoch < args.pre_epoch:
                 pred_all, loss_transfer, out_weight_list = model.forward_pre_train(
                     feature_all, len_win=args.len_win)
-                pdb.set_trace()
-                print(out_weight_list)
+                # pdb.set_trace()
+                # print(out_weight_list)
             else:
                 pred_all, loss_transfer, dist, weight_mat = model.forward_Boosting(
                     feature_all, weight_mat)
@@ -108,9 +108,9 @@ def train_AdaRNN(args, model, optimizer, train_loader_list, epoch, dist_old=None
             loss_s = criterion(pred_s, label_reg_s)
             loss_t = criterion(pred_t, label_reg_t)
             loss_l1 = criterion_1(pred_s, label_reg_s)
-            loss_s = criterion(pred_s)
-            loss_t = criterion(pred_t)
-            loss_l1 = criterion_1(pred_s)
+            # loss_s = criterion(pred_s)
+            # loss_t = criterion(pred_t)
+            # loss_l1 = criterion_1(pred_s)
 
 
             total_loss = total_loss + loss_s + loss_t + args.dw * loss_transfer
@@ -149,8 +149,8 @@ def train_epoch_transfer_Boosting(model, optimizer, train_loader_list, epoch, di
         list_feat = []
         list_label = []
         for data in data_all:
-            feature, label, label_reg = data[0].float(
-            ), data[1].long(), data[2].float()
+            feature, label_reg = data[0].float(
+            ),data[1].float()
             list_feat.append(feature)
             list_label.append(label_reg)
         flag = False
@@ -223,10 +223,12 @@ def train_epoch_transfer(args, model, optimizer, train_loader_list):
         list_feat = []
         list_label = []
         for data in data_all:
-            feature, label, label_reg = data[0].float(
-            ), data[1].long(), data[2].float()
+            feature, label_reg = data[0].float(
+            ), data[1].float()
             list_feat.append(feature)
             list_label.append(label_reg)
+        # pdb.set_trace()
+        # print(list_label)
         flag = False
         index = get_index(len(data_all) - 1)
         for temp_index in index:
@@ -245,6 +247,9 @@ def train_epoch_transfer(args, model, optimizer, train_loader_list):
             feature_t = list_feat[index[i][1]]
             label_reg_s = list_label[index[i][0]]
             label_reg_t = list_label[index[i][1]]
+            # pdb.set_trace()
+            # print(label_reg_s)
+            # print(label_reg_t)
             feature_all = torch.cat((feature_s, feature_t), 0)
 
             pred_all, loss_transfer, out_weight_list = model.forward_pre_train(
@@ -281,7 +286,8 @@ def test_epoch(model, test_loader, prefix='Test'):
     correct = 0
     criterion = nn.MSELoss()
     criterion_1 = nn.L1Loss()
-    for feature, label, label_reg in tqdm(test_loader, desc=prefix, total=len(test_loader)):
+    # for feature, label, label_reg in tqdm(test_loader, desc=prefix, total=len(test_loader)):
+    for feature,label_reg in tqdm(test_loader, desc=prefix, total=len(test_loader)):
         # feature, label_reg = feature.float(), label_reg.float()
         feature, label_reg = feature.float(), label_reg.float()
         with torch.no_grad():
@@ -393,13 +399,13 @@ def main_transfer(args):
     best_score = np.inf
     best_epoch, stop_round = 0, 0
     weight_mat, dist_mat = None, None
-    pdb.set_trace()
-    file_path = "my_list.pkl" #saving the trai_loader_list
-    with open(file_path, 'wb') as f:
-        pickle.dump(train_loader_list, f)
+    # pdb.set_trace()
+    # file_path = "my_list.pkl" #saving the trai_loader_list
+    # with open(file_path, 'wb') as f:
+    #     pickle.dump(train_loader_list, f)
 
-    print("List saved as pickle file successfully.")
-    print(train_loader_list)
+    # print("List saved as pickle file successfully.")
+    # print(train_loader_list)
     for epoch in range(args.n_epochs):
         pprint('Epoch:', epoch)
         pprint('training...')
@@ -484,7 +490,7 @@ def get_args():
     parser.add_argument('--data_mode', type=str,
                         default='tdc')
     parser.add_argument('--num_domain', type=int, default=2)
-    parser.add_argument('--len_seq', type=int, default=24)
+    parser.add_argument('--len_seq', type=int, default=375)
 
     # other
     parser.add_argument('--seed', type=int, default=10)
