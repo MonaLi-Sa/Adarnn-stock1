@@ -190,3 +190,6 @@ class AdaRNN(nn.Module):
         else:
             fc_out = self.fc_out(fea[:, -1, :]).squeeze()
         return fc_out
+
+    def dummy(self):
+        print("ignore")
